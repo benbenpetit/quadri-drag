@@ -1,0 +1,62 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #121212;
+}
+
+.wrapper {
+  min-height: 100vh;
+}
+
+.drag-section {
+  overflow: hidden;
+  backface-visibility: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.drag-grid-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(300 * var(--vw));
+  height: calc(300 * var(--vh));
+  will-change: transform;
+  transform-origin: 50% 50% 0px;
+  transform: translate(-50%, -50%);
+}
+
+.drag-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  transform-origin: 0 0;
+  width: calc(300 * var(--vw));
+  height: calc(300 * var(--vh));
+}
+
+.drag-grid-item {
+  position: absolute;
+  width: calc(100 * var(--vw));
+  height: calc(100 * var(--vh));
+
+  @for $i from 0 through 2 {
+    &[data-row='#{$i}'] {
+      top: calc((#{$i} - 1) * 100 * var(--vh));
+    }
+
+    &[data-col='#{$i}'] {
+      left: calc((#{$i} - 1) * 100 * var(--vw));
+    }
+  }
+}
