@@ -2,6 +2,12 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 body {
@@ -11,6 +17,11 @@ body {
 
 .wrapper {
   min-height: 100vh;
+  cursor: grab;
+
+  &.is-dragging {
+    cursor: grabbing;
+  }
 }
 
 .drag-section {
@@ -52,11 +63,11 @@ body {
 
   @for $i from 0 through 2 {
     &[data-row='#{$i}'] {
-      top: calc((#{$i} - 1) * 100 * var(--vh));
+      top: calc($i / 3) * 100%;
     }
 
     &[data-col='#{$i}'] {
-      left: calc((#{$i} - 1) * 100 * var(--vw));
+      left: calc($i / 3) * 100%;
     }
   }
 }
