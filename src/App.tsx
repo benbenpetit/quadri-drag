@@ -148,6 +148,167 @@ const App = () => {
     return () => cancelAnimationFrame(requestRef.current)
   }, [lerpMousePos, mousePos])
 
+  const computeDragItemComponent = (i: number) => {
+    switch (i) {
+      case 0:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 1:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 2:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 3:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 4:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 5:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 6:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 7:
+        return (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 32
+            }}
+          >
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      case 8:
+        return (
+          <div>
+            <h1>Drag Item {i}</h1>
+            <p>
+              Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+              Necessitatibus, consequuntur!
+            </p>
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
   return (
     <div
       className='wrapper'
@@ -196,7 +357,14 @@ const App = () => {
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
       >
-        <div className='drag-grid-wrap'>
+        <div
+          className='drag-grid-wrap'
+          style={{
+            transform: `translate(-50%, -50%) translate3d(0, 0, 0) scale(${
+              dragging ? 0.9 : 1
+            })`
+          }}
+        >
           <div
             className='drag-grid'
             style={{
@@ -213,8 +381,9 @@ const App = () => {
                   key={i}
                   data-row={Math.floor(i / 3)}
                   data-col={i % 3}
-                  style={{ border: `100px solid hsl(${i * 40}, 50%, 60%)` }}
-                />
+                >
+                  {computeDragItemComponent(i)}
+                </div>
               )
             })}
           </div>
