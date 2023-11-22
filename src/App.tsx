@@ -1,6 +1,12 @@
-import { CSSProperties, useEffect, useRef, useState } from 'react'
-import './main.scss'
 import clsx from 'clsx'
+import React, {
+  CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import './main.scss'
 
 const lerp = (a: number, b: number, t: number) => a * (1 - t) + b * t
 
@@ -17,6 +23,38 @@ const App = () => {
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 })
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [lerpMousePos, setLerpMousePos] = useState({ x: 0, y: 0 })
+  const realCenterPos = useMemo(() => {
+    return {
+      x: -dragPos.x + windowDimensions.width / 2,
+      y: -dragPos.y + windowDimensions.height / 2
+    }
+  }, [dragPos, windowDimensions])
+
+  const dragToItem = (row: number, col: number) => {
+    setMousePos({
+      x: -windowDimensions.width * (col - 0.5) + windowDimensions.width / 2,
+      y: -windowDimensions.height * (row - 0.5) + windowDimensions.height / 2
+    })
+  }
+
+  const handleMapItemClick = (row: number, col: number) => {
+    dragToItem(row, col)
+    console.log(row, col)
+  }
+
+  const isInsideItem = (row: number, col: number) => {
+    const cleanRealCenterPos = {
+      x: realCenterPos.x / windowDimensions.width + 1,
+      y: realCenterPos.y / windowDimensions.height + 1
+    }
+
+    return (
+      cleanRealCenterPos.x > col &&
+      cleanRealCenterPos.x < col + 1 &&
+      cleanRealCenterPos.y > row &&
+      cleanRealCenterPos.y < row + 1
+    )
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -32,53 +70,61 @@ const App = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const { clientX, clientY } = e
+    setOffsetCursorPos({ x: clientX, y: clientY })
+    setBasePos(dragPos)
+    setIsMouseDown(true)
+  }
+
   useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      const { x, y } = e
-      setOffsetCursorPos({ x, y })
-      setBasePos(dragPos)
-      setIsMouseDown(true)
-    }
     const handleMouseUp = () => {
       setIsMouseDown(false)
       setDragging(false)
     }
 
-    window.addEventListener('mousedown', handleMouseDown)
     window.addEventListener('mouseup', handleMouseUp)
     return () => {
-      window.removeEventListener('mousedown', handleMouseDown)
       window.removeEventListener('mouseup', handleMouseUp)
     }
   }, [dragPos])
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isMouseDown) {
-        setDragging(true)
-      }
-      if (dragging && isMouseDown) {
-        const newPos = {
-          x: basePos.x + e.x - offsetCursorPos.x,
-          y: basePos.y + e.y - offsetCursorPos.y
-        }
+    setMousePos((prevState) => ({
+      x: Math.min(
+        Math.max(-windowDimensions.width, prevState.x),
+        windowDimensions.width
+      ),
+      y: Math.min(
+        Math.max(-windowDimensions.height, prevState.y),
+        windowDimensions.height
+      )
+    }))
+  }, [windowDimensions])
 
-        setMousePos({
-          x: Math.min(
-            Math.max(-windowDimensions.width, newPos.x),
-            windowDimensions.width
-          ),
-          y: Math.min(
-            Math.max(-windowDimensions.height, newPos.y),
-            windowDimensions.height
-          )
-        })
-      }
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMouseDown) {
+      setDragging(true)
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [dragging, offsetCursorPos, basePos])
+    if (dragging && isMouseDown) {
+      const newPos = {
+        x: basePos.x + e.clientX - offsetCursorPos.x,
+        y: basePos.y + e.clientY - offsetCursorPos.y
+      }
+
+      setMousePos({
+        x: Math.min(
+          Math.max(-windowDimensions.width, newPos.x),
+          windowDimensions.width
+        ),
+        y: Math.min(
+          Math.max(-windowDimensions.height, newPos.y),
+          windowDimensions.height
+        )
+      })
+    }
+  }
 
   useEffect(() => {
     setDragPos({
@@ -87,16 +133,16 @@ const App = () => {
     })
   }, [lerpMousePos])
 
-  const handleRaf = () => {
-    setLerpMousePos({
-      x: lerp(lerpMousePos.x, mousePos.x, 0.1),
-      y: lerp(lerpMousePos.y, mousePos.y, 0.1)
-    })
-
-    requestRef.current = requestAnimationFrame(handleRaf)
-  }
-
   useEffect(() => {
+    const handleRaf = () => {
+      setLerpMousePos({
+        x: lerp(lerpMousePos.x, mousePos.x, 0.1),
+        y: lerp(lerpMousePos.y, mousePos.y, 0.1)
+      })
+
+      requestRef.current = requestAnimationFrame(handleRaf)
+    }
+
     requestRef.current = requestAnimationFrame(handleRaf)
 
     return () => cancelAnimationFrame(requestRef.current)
@@ -104,7 +150,7 @@ const App = () => {
 
   return (
     <div
-      className={clsx('wrapper', dragging && 'is-dragging')}
+      className='wrapper'
       style={
         {
           '--vw': `${windowDimensions.width / 100}px`,
@@ -112,7 +158,44 @@ const App = () => {
         } as CSSProperties
       }
     >
-      <div className='drag-section'>
+      <div className='map-grid'>
+        <div
+          className='map-point'
+          style={{
+            left: `${
+              ((-dragPos.x / windowDimensions.width + 1) / 3 + 1 / 6) * 100
+            }%`,
+            top: `${
+              ((-dragPos.y / windowDimensions.height + 1) / 3 + 1 / 6) * 100
+            }%`
+          }}
+        />
+        <table>
+          <tbody>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <tr key={i}>
+                {Array.from({ length: 3 }).map((_, j) => {
+                  const isInside = isInsideItem(i, j)
+                  return (
+                    <td
+                      className={clsx('map-grid-item', isInside && 'is-inside')}
+                      key={j}
+                      data-row={i}
+                      data-col={j}
+                      onClick={() => handleMapItemClick(i, j)}
+                    />
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div
+        className={clsx('drag-section', dragging && 'is-dragging')}
+        onMouseMove={handleMouseMove}
+        onMouseDown={handleMouseDown}
+      >
         <div className='drag-grid-wrap'>
           <div
             className='drag-grid'
@@ -120,15 +203,20 @@ const App = () => {
               transform: `translate3d(${dragPos.x}px, ${dragPos.y}px, 0px)`
             }}
           >
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                className='drag-grid-item'
-                key={i}
-                data-row={Math.floor(i / 3)}
-                data-col={i % 3}
-                style={{ backgroundColor: `hsl(${i * 40}, 50%, 60%)` }}
-              />
-            ))}
+            {Array.from({ length: 9 }).map((_, i) => {
+              const row = Math.floor(i / 3)
+              const col = Math.floor(i % 3)
+              const isInside = isInsideItem(row, col)
+              return (
+                <div
+                  className={clsx('drag-grid-item', isInside && 'is-inside')}
+                  key={i}
+                  data-row={Math.floor(i / 3)}
+                  data-col={i % 3}
+                  style={{ border: `100px solid hsl(${i * 40}, 50%, 60%)` }}
+                />
+              )
+            })}
           </div>
         </div>
       </div>
