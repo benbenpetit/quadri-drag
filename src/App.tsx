@@ -12,7 +12,7 @@ const lerp = (a: number, b: number, t: number) => a * (1 - t) + b * t
 
 const ROTATES = Array.from({ length: 9 }).map(() => {
   const rotate = Math.floor(Math.random() * 40)
-  return `rotate(${rotate - 20}deg)`
+  return rotate - 20
 })
 
 const App = () => {
@@ -186,10 +186,11 @@ const App = () => {
             <img
               src={getImageUrl(`${i + 1}.avif`)}
               alt="Samuel Zeller photo"
-              loading="lazy"
               draggable={false}
               style={{
-                transform: ROTATES[i],
+                transform: `translate3d(${lerpMousePos.x / 6}px, ${
+                  lerpMousePos.y / 6
+                }px, 0px) rotate(${ROTATES[i]}deg)`,
               }}
             />
           </div>
