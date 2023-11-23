@@ -45,7 +45,7 @@ const App = () => {
 
   const handleMapItemClick = (row: number, col: number) => {
     dragToItem(row, col)
-    handleZoomOutClick(false)
+    handleZoomOutClick(false, row, col)
   }
 
   const isInsideItem = (row: number, col: number) => {
@@ -110,8 +110,8 @@ const App = () => {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (isMouseDown) {
-      setDragging(true)
-      handleZoomOutClick(false)
+      if (!dragging) setDragging(true)
+      if (isZoomOut) handleZoomOutClick(false)
     }
 
     if (dragging && isMouseDown) {
@@ -160,12 +160,38 @@ const App = () => {
     return () => cancelAnimationFrame(requestRef.current)
   }, [lerpMousePos, mousePos])
 
-  const handleZoomOutClick = (bool: boolean) => {
+  const handleZoomOutClick = (bool: boolean, row = 1, col = 1) => {
     setIsZoomOut(bool)
-    if (bool) {
-      dragToItem(1, 1)
-    }
+    dragToItem(row, col)
   }
+
+  const getDragRowCol = (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    const dragItem = target.closest('.drag-grid-item')
+    const row = Number(dragItem?.getAttribute('data-row')) ?? 1
+    const col = Number(dragItem?.getAttribute('data-col')) ?? 1
+    return { row, col }
+  }
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      const delta = e.deltaY
+      const zooming = delta < 0
+
+      if (!isZoomOut && zooming) return
+
+      if (zooming) {
+        const { row, col } = getDragRowCol(e)
+        handleZoomOutClick(false, row, col)
+      } else {
+        handleZoomOutClick(true)
+      }
+    }
+
+    window.addEventListener('wheel', handleWheel)
+
+    return () => window.removeEventListener('wheel', handleWheel)
+  }, [isZoomOut])
 
   const getImageUrl = (x: string) => {
     return new URL(`/src/assets/img/${x}`, import.meta.url).href
@@ -188,9 +214,7 @@ const App = () => {
               alt="Samuel Zeller photo"
               draggable={false}
               style={{
-                transform: `translate3d(${lerpMousePos.x / 6}px, ${
-                  lerpMousePos.y / 6
-                }px, 0px) rotate(${ROTATES[i]}deg)`,
+                transform: `rotate(${ROTATES[i]}deg)`,
               }}
             />
           </div>
@@ -285,7 +309,6 @@ const App = () => {
             transform: `translate(-50%, -50%) translate3d(0, 0, 0) scale(${
               isZoomOut ? 1 / 3 : dragging ? 0.85 : 1
             })`,
-            transitionDuration: isZoomOut ? '0.75s' : '0.4s',
           }}
         >
           <div
@@ -304,6 +327,11 @@ const App = () => {
                   key={i}
                   data-row={Math.floor(i / 3)}
                   data-col={i % 3}
+                  onClick={() => {
+                    if (isZoomOut) {
+                      handleZoomOutClick(false, row, col)
+                    }
+                  }}
                 >
                   {computeDragItemComponent(i)}
                 </div>
