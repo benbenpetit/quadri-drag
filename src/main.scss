@@ -28,10 +28,126 @@ body {
   margin: 0;
   font-family: 'Meadow';
   background-color: var(--purple);
+  overflow: hidden;
 }
 
 .wrapper {
   min-height: 100vh;
+}
+
+.custom-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  width: 6.75rem;
+  height: 6.75rem;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.175s cubic-bezier(0.4, 0, 0, 1);
+
+  [data-on-link='true'] & {
+    transform: translate(-50%, -50%) scale(0);
+  }
+
+  .arrows {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+
+    .arrow {
+      position: absolute;
+      color: #121212;
+      transform-origin: center;
+      width: 20%;
+      transition: all 0.175s cubic-bezier(0.4, 0, 0, 1);
+
+      [data-dragging='true'] & {
+        color: var(--light-green);
+      }
+
+      &:nth-child(1) {
+        left: 50%;
+        top: 80%;
+        transform: translate(-50%, -50%) rotate(0deg);
+
+        [data-dragging='true'] & {
+          transform: translate(-50%, -150%) rotate(0deg);
+        }
+      }
+
+      &:nth-child(2) {
+        left: 20%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(90deg);
+
+        [data-dragging='true'] & {
+          transform: translate(50%, -50%) rotate(90deg);
+        }
+      }
+
+      &:nth-child(3) {
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(180deg);
+
+        [data-dragging='true'] & {
+          transform: translate(-50%, 50%) rotate(180deg);
+        }
+      }
+
+      &:nth-child(4) {
+        left: 80%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(270deg);
+
+        [data-dragging='true'] & {
+          transform: translate(-150%, -50%) rotate(270deg);
+        }
+      }
+    }
+  }
+
+  .label {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    font-family: 'Arial';
+    font-weight: 600;
+    opacity: 1;
+    transition: all 0.175s cubic-bezier(0.4, 0, 0, 1);
+
+    [data-dragging='true'] & {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+  }
+
+  .circle {
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: var(--light-green);
+    border-radius: 9999px;
+    opacity: 1;
+    transition: all 0.175s cubic-bezier(0.4, 0, 0, 1);
+
+    [data-dragging='true'] & {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+  }
 }
 
 header {
@@ -66,7 +182,7 @@ header {
       transition: width 0.75s cubic-bezier(0.4, 0, 0, 1),
         height 0.75s cubic-bezier(0.4, 0, 0, 1);
 
-      [zoom-out='true'] & {
+      [data-zoom-out='true'] & {
         width: calc(0.3 * var(--w));
         height: calc(0.3 * var(--w));
 
@@ -115,7 +231,7 @@ header {
       transform: scale(1);
       transition: transform 1s cubic-bezier(0.4, 0, 0, 1);
 
-      [zoom-out='true'] & {
+      [data-zoom-out='true'] & {
         transform: scale(2);
       }
     }
@@ -167,7 +283,7 @@ header {
       color: var(--blue);
       transition: color 0.125s cubic-bezier(0.4, 0, 0, 1);
 
-      [zoom-out='true'] & {
+      [data-zoom-out='true'] & {
         background-color: var(--light-green);
 
         svg {
@@ -198,11 +314,7 @@ header {
   top: 0;
   right: 0;
   bottom: 0;
-  cursor: grab;
-
-  &.is-dragging {
-    cursor: grabbing;
-  }
+  cursor: none;
 }
 
 .drag-grid-wrap {
@@ -227,7 +339,6 @@ header {
   width: calc(300 * var(--vw));
   height: calc(300 * var(--vh));
   background-color: var(--purple);
-  // background: linear-gradient(31deg, var(--purple) 0%, var(--blue) 100%);
 }
 
 .drag-grid-item {

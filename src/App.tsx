@@ -28,6 +28,8 @@ const App = () => {
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 })
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [lerpMousePos, setLerpMousePos] = useState({ x: 0, y: 0 })
+  const [permaMousePos, setPermaMousePos] = useState({ x: 0, y: 0 })
+  const [onLink, setOnLink] = useState(false)
   const realCenterPos = useMemo(() => {
     return {
       x: -dragPos.x + windowDimensions.width / 2,
@@ -109,6 +111,20 @@ const App = () => {
   }, [windowDimensions])
 
   const handleMouseMove = (e: MouseEvent) => {
+    const target = e.target as HTMLElement
+    const isContainLink = target.closest('[data-link]')
+
+    if (isContainLink) {
+      setOnLink(true)
+    } else {
+      setOnLink(false)
+    }
+
+    setPermaMousePos({
+      x: e.clientX,
+      y: e.clientY,
+    })
+
     if (isMouseDown) {
       if (!dragging) setDragging(true)
       if (isZoomOut) handleZoomOutClick(false)
@@ -223,7 +239,11 @@ const App = () => {
         return (
           <div className="item-container">
             <h1>Samuel Zeller</h1>
-            <a href="https://www.samuelzeller.ch/series/" target="_blank">
+            <a
+              href="https://www.samuelzeller.ch/series/"
+              target="_blank"
+              data-link
+            >
               visit
             </a>
           </div>
@@ -242,10 +262,41 @@ const App = () => {
           '--vh': `${windowDimensions.height / 100}px`,
         } as CSSProperties
       }
-      zoom-out={String(isZoomOut)}
+      data-zoom-out={String(isZoomOut)}
+      data-dragging={String(isMouseDown)}
+      data-on-link={String(onLink)}
     >
+      <div
+        className="custom-cursor"
+        style={{
+          left: permaMousePos.x,
+          top: permaMousePos.y,
+        }}
+      >
+        <div className="arrows">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <svg
+              key={i}
+              className="arrow"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75"
+              />
+            </svg>
+          ))}
+        </div>
+        <span className="label">drag</span>
+        <span className="circle" />
+      </div>
       <header>
-        <div className="unzoom">
+        <div className="unzoom" data-link>
           <button onClick={() => handleZoomOutClick(!isZoomOut)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -262,7 +313,7 @@ const App = () => {
             </svg>
           </button>
         </div>
-        <div className="map-grid">
+        <div className="map-grid" data-link>
           <div
             className="map-point"
             style={{
